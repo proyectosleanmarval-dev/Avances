@@ -1,0 +1,30 @@
+[
+  {
+    "Proyecto": "Proyecto A",
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-01 00:00:00",
+    "Dias_Atraso": 0,
+    "Fuente": "Enero.xlsx"
+  },
+  {
+    "Proyecto": "Proyecto B",
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-01 00:00:00",
+    "Dias_Atraso": 0,
+    "Fuente": "Enero.xlsx"
+  },
+  {
+    "Proyecto": "Proyecto A",
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-01 00:00:00",
+    "Dias_Atraso": 0,
+    "Fuente": "Febrero.xlsx"
+  },
+  {
+    "Proyecto": "Proyecto B",
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-01 00:00:00",
+    "Dias_Atraso": 0,
+    "Fuente": "Febrero.xlsx"
+  }
+]
