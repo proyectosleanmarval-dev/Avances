@@ -2,6 +2,8 @@ name: Procesar Excels
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'data/*.xlsx'
   workflow_dispatch:
@@ -11,13 +13,15 @@ permissions:
 
 jobs:
   build:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar repositorio
+      - name: Checkout del repositorio
         uses: actions/checkout@v3
         with:
           persist-credentials: true
+          fetch-depth: 0
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -39,8 +43,19 @@ jobs:
 
           if [ -f data/consolidado.json ]; then
             git add data/consolidado.json
-            git diff --cached --quiet || git commit -m "Actualizar consolidado automático"
-            git push
+
+            if ! git diff --cached --quiet; then
+              git commit -m "Actualizar consolidado automático"
+
+              # Sincronizar con remoto
+              git fetch origin main
+              git rebase origin/main
+
+              # Push seguro evitando conflictos
+              git push --force-with-lease origin main
+            else
+              echo "No hay cambios para commit"
+            fi
           else
             echo "No se generó consolidado.json"
           fi
