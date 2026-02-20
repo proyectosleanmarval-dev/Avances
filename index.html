@@ -2,23 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard de Atrasos</title>
+  <title>Días de Atraso por Proyecto</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
-      background-color: #f7f9fc;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    #estado {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #555;
+      background: #f7f9fc;
     }
 
     table {
@@ -35,25 +25,20 @@
     }
 
     th {
-      background-color: #1f2937;
+      background: #1f2937;
       color: white;
     }
 
     td.proyecto {
       text-align: left;
       font-weight: bold;
-      background-color: #f3f4f6;
+      background: #f3f4f6;
     }
 
     td.atraso {
-      background-color: #ffe5e5;
-      font-weight: bold;
+      background: #ffe5e5;
       color: #b30000;
-    }
-
-    tfoot td {
       font-weight: bold;
-      background-color: #e5e7eb;
     }
   </style>
 </head>
@@ -66,7 +51,6 @@
 <table id="tabla" style="display:none;">
   <thead></thead>
   <tbody></tbody>
-  <tfoot></tfoot>
 </table>
 
 <script>
@@ -82,74 +66,61 @@ async function cargarDatos() {
       return;
     }
 
-    // ===== CONFIGURACIÓN DE COLUMNAS =====
-    const campoProyecto = "Proyecto";
-    const campoMes = "Mes";
-    const campoAtraso = "Dias_Atraso";
-    // =====================================
-
-    // Obtener lista única de meses ordenados
-    const meses = [...new Set(data.map(d => d[campoMes]))].sort();
-
-    // Agrupar datos por proyecto
+    // Agrupar datos
     const proyectos = {};
+    const mesesSet = new Set();
 
     data.forEach(d => {
-      const proyecto = d[campoProyecto];
-      const mes = d[campoMes];
-      const atraso = Number(d[campoAtraso]) || 0;
+
+      const proyecto = d.Proyecto;
+
+      // Extraer mes desde nombre archivo (Enero.xlsx -> Enero)
+      const mes = d.__archivo_origen.replace(".xlsx", "");
+
+      mesesSet.add(mes);
+
+      // Calcular días de atraso
+      const base = new Date(d.Fecha_Base);
+      const proyectada = new Date(d.Fecha_Proyectada);
+
+      const diasAtraso = Math.round(
+        (proyectada - base) / (1000 * 60 * 60 * 24)
+      );
 
       if (!proyectos[proyecto]) {
         proyectos[proyecto] = {};
       }
 
-      proyectos[proyecto][mes] = atraso;
+      proyectos[proyecto][mes] = diasAtraso;
     });
+
+    const meses = Array.from(mesesSet).sort();
 
     const thead = document.querySelector("#tabla thead");
     const tbody = document.querySelector("#tabla tbody");
-    const tfoot = document.querySelector("#tabla tfoot");
 
-    // Construir encabezado
+    // Header
     let header = "<tr><th>Proyecto</th>";
     meses.forEach(m => header += `<th>${m}</th>`);
-    header += "<th>Total</th></tr>";
+    header += "</tr>";
     thead.innerHTML = header;
 
-    // Construir cuerpo
+    // Body
     let bodyHTML = "";
-    let totalesPorMes = {};
-    meses.forEach(m => totalesPorMes[m] = 0);
 
     for (const proyecto in proyectos) {
-      let totalProyecto = 0;
       bodyHTML += `<tr><td class="proyecto">${proyecto}</td>`;
 
       meses.forEach(m => {
         const valor = proyectos[proyecto][m] ?? 0;
-        totalProyecto += valor;
-        totalesPorMes[m] += valor;
-
         const clase = valor > 0 ? "atraso" : "";
         bodyHTML += `<td class="${clase}">${valor}</td>`;
       });
 
-      bodyHTML += `<td><strong>${totalProyecto}</strong></td></tr>`;
+      bodyHTML += "</tr>";
     }
 
     tbody.innerHTML = bodyHTML;
-
-    // Construir fila de totales
-    let footerHTML = "<tr><td>Total Mes</td>";
-    let granTotal = 0;
-
-    meses.forEach(m => {
-      footerHTML += `<td>${totalesPorMes[m]}</td>`;
-      granTotal += totalesPorMes[m];
-    });
-
-    footerHTML += `<td>${granTotal}</td></tr>`;
-    tfoot.innerHTML = footerHTML;
 
     document.getElementById("estado").style.display = "none";
     document.getElementById("tabla").style.display = "table";
