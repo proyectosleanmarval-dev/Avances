@@ -1,87 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Consolidado</title>
+  <title>Dashboard de Atrasos</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 30px;
+      background-color: #f7f9fc;
     }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #estado {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #555;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
       margin-top: 20px;
+      background: white;
     }
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
+      text-align: center;
     }
+
     th {
-      background-color: #f4f4f4;
+      background-color: #1f2937;
+      color: white;
+    }
+
+    td.proyecto {
+      text-align: left;
       font-weight: bold;
+      background-color: #f3f4f6;
+    }
+
+    td.atraso {
+      background-color: #ffe5e5;
+      font-weight: bold;
+      color: #b30000;
+    }
+
+    tfoot td {
+      font-weight: bold;
+      background-color: #e5e7eb;
     }
   </style>
 </head>
+
 <body>
 
-  <h1>Consolidado de Proyectos</h1>
+<h1>Días de Atraso por Proyecto y Mes</h1>
+<div id="estado">Cargando datos...</div>
 
-  <div id="estado">Cargando datos...</div>
-  <table id="tabla" style="display:none;">
-    <thead id="thead"></thead>
-    <tbody id="tbody"></tbody>
-  </table>
+<table id="tabla" style="display:none;">
+  <thead></thead>
+  <tbody></tbody>
+  <tfoot></tfoot>
+</table>
 
-  <script>
-    async function cargarDatos() {
-      try {
-        const response = await fetch('data/consolidado.json');
+<script>
+async function cargarDatos() {
+  try {
+    const response = await fetch('data/consolidado.json');
+    if (!response.ok) throw new Error("No se pudo cargar el JSON");
 
-        if (!response.ok) {
-          throw new Error('No se pudo cargar el JSON');
-        }
+    const data = await response.json();
 
-        const data = await response.json();
-
-        if (!Array.isArray(data) || data.length === 0) {
-          document.getElementById("estado").innerText = "No hay datos disponibles.";
-          return;
-        }
-
-        document.getElementById("estado").style.display = "none";
-        document.getElementById("tabla").style.display = "table";
-
-        const thead = document.getElementById("thead");
-        const tbody = document.getElementById("tbody");
-
-        // Crear encabezados dinámicos
-        const columnas = Object.keys(data[0]);
-        let headerRow = "<tr>";
-        columnas.forEach(col => {
-          headerRow += `<th>${col}</th>`;
-        });
-        headerRow += "</tr>";
-        thead.innerHTML = headerRow;
-
-        // Crear filas
-        data.forEach(fila => {
-          let row = "<tr>";
-          columnas.forEach(col => {
-            row += `<td>${fila[col]}</td>`;
-          });
-          row += "</tr>";
-          tbody.innerHTML += row;
-        });
-
-      } catch (error) {
-        document.getElementById("estado").innerText =
-          "Error cargando datos: " + error.message;
-      }
+    if (!Array.isArray(data) || data.length === 0) {
+      document.getElementById("estado").innerText = "No hay datos disponibles.";
+      return;
     }
 
-    cargarDatos();
-  </script>
+    // ===== CONFIGURACIÓN DE COLUMNAS =====
+    const campoProyecto = "Proyecto";
+    const campoMes = "Mes";
+    const campoAtraso = "Dias_Atraso";
+    // =====================================
+
+    // Obtener lista única de meses ordenados
+    const meses = [...new Set(data.map(d => d[campoMes]))].sort();
+
+    // Agrupar datos por proyecto
+    const proyectos = {};
+
+    data.forEach(d => {
+      const proyecto = d[campoProyecto];
+      const mes = d[campoMes];
+      const atraso = Number(d[campoAtraso]) || 0;
+
+      if (!proyectos[proyecto]) {
+        proyectos[proyecto] = {};
+      }
+
+      proyectos[proyecto][mes] = atraso;
+    });
+
+    const thead = document.querySelector("#tabla thead");
+    const tbody = document.querySelector("#tabla tbody");
+    const tfoot = document.querySelector("#tabla tfoot");
+
+    // Construir encabezado
+    let header = "<tr><th>Proyecto</th>";
+    meses.forEach(m => header += `<th>${m}</th>`);
+    header += "<th>Total</th></tr>";
+    thead.innerHTML = header;
+
+    // Construir cuerpo
+    let bodyHTML = "";
+    let totalesPorMes = {};
+    meses.forEach(m => totalesPorMes[m] = 0);
+
+    for (const proyecto in proyectos) {
+      let totalProyecto = 0;
+      bodyHTML += `<tr><td class="proyecto">${proyecto}</td>`;
+
+      meses.forEach(m => {
+        const valor = proyectos[proyecto][m] ?? 0;
+        totalProyecto += valor;
+        totalesPorMes[m] += valor;
+
+        const clase = valor > 0 ? "atraso" : "";
+        bodyHTML += `<td class="${clase}">${valor}</td>`;
+      });
+
+      bodyHTML += `<td><strong>${totalProyecto}</strong></td></tr>`;
+    }
+
+    tbody.innerHTML = bodyHTML;
+
+    // Construir fila de totales
+    let footerHTML = "<tr><td>Total Mes</td>";
+    let granTotal = 0;
+
+    meses.forEach(m => {
+      footerHTML += `<td>${totalesPorMes[m]}</td>`;
+      granTotal += totalesPorMes[m];
+    });
+
+    footerHTML += `<td>${granTotal}</td></tr>`;
+    tfoot.innerHTML = footerHTML;
+
+    document.getElementById("estado").style.display = "none";
+    document.getElementById("tabla").style.display = "table";
+
+  } catch (error) {
+    document.getElementById("estado").innerText =
+      "Error cargando datos: " + error.message;
+  }
+}
+
+cargarDatos();
+</script>
 
 </body>
 </html>
