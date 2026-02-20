@@ -1,9 +1,87 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mi sitio</title>
+  <meta charset="UTF-8">
+  <title>Consolidado</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hola mundo</h1>
+
+  <h1>Consolidado de Proyectos</h1>
+
+  <div id="estado">Cargando datos...</div>
+  <table id="tabla" style="display:none;">
+    <thead id="thead"></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <script>
+    async function cargarDatos() {
+      try {
+        const response = await fetch('data/consolidado.json');
+
+        if (!response.ok) {
+          throw new Error('No se pudo cargar el JSON');
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+          document.getElementById("estado").innerText = "No hay datos disponibles.";
+          return;
+        }
+
+        document.getElementById("estado").style.display = "none";
+        document.getElementById("tabla").style.display = "table";
+
+        const thead = document.getElementById("thead");
+        const tbody = document.getElementById("tbody");
+
+        // Crear encabezados dinámicos
+        const columnas = Object.keys(data[0]);
+        let headerRow = "<tr>";
+        columnas.forEach(col => {
+          headerRow += `<th>${col}</th>`;
+        });
+        headerRow += "</tr>";
+        thead.innerHTML = headerRow;
+
+        // Crear filas
+        data.forEach(fila => {
+          let row = "<tr>";
+          columnas.forEach(col => {
+            row += `<td>${fila[col]}</td>`;
+          });
+          row += "</tr>";
+          tbody.innerHTML += row;
+        });
+
+      } catch (error) {
+        document.getElementById("estado").innerText =
+          "Error cargando datos: " + error.message;
+      }
+    }
+
+    cargarDatos();
+  </script>
+
 </body>
 </html>
