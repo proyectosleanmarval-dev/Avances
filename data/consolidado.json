@@ -3,42 +3,42 @@
     "Proyecto": "Proyecto A",
     "Fecha_Base": "2025-12-01 00:00:00",
     "Fecha_Proyectada": "2025-12-20 00:00:00",
-    "Dias_Atraso": 19.0,
+    "Dias_Atraso": 19,
     "Fuente": "Enero.xlsx"
   },
   {
     "Proyecto": "Proyecto B",
-    "Fecha_Base": "NaT",
-    "Fecha_Proyectada": "NaT",
-    "Dias_Atraso": NaN,
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-20 00:00:00",
+    "Dias_Atraso": 19,
     "Fuente": "Enero.xlsx"
   },
   {
     "Proyecto": "Proyecto C",
-    "Fecha_Base": "NaT",
-    "Fecha_Proyectada": "NaT",
-    "Dias_Atraso": NaN,
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-20 00:00:00",
+    "Dias_Atraso": 19,
     "Fuente": "Enero.xlsx"
   },
   {
     "Proyecto": "Proyecto A",
     "Fecha_Base": "2025-12-01 00:00:00",
     "Fecha_Proyectada": "2025-12-05 00:00:00",
-    "Dias_Atraso": 4.0,
+    "Dias_Atraso": 4,
     "Fuente": "Febrero.xlsx"
   },
   {
     "Proyecto": "Proyecto B",
-    "Fecha_Base": "NaT",
-    "Fecha_Proyectada": "NaT",
-    "Dias_Atraso": NaN,
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-05 00:00:00",
+    "Dias_Atraso": 4,
     "Fuente": "Febrero.xlsx"
   },
   {
     "Proyecto": "Proyecto C",
-    "Fecha_Base": "NaT",
-    "Fecha_Proyectada": "NaT",
-    "Dias_Atraso": NaN,
+    "Fecha_Base": "2025-12-01 00:00:00",
+    "Fecha_Proyectada": "2025-12-05 00:00:00",
+    "Dias_Atraso": 4,
     "Fuente": "Febrero.xlsx"
   }
 ]
