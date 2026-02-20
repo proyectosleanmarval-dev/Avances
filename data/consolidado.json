@@ -2,6 +2,24 @@
   {
     "Proyecto":"BURDEOS CIUDAD LA SALLE",
     "Fecha_Base":1809388800000,
+    "Fecha_Proyectada":1805500800000,
+    "__archivo_origen":"Enero.xlsx"
+  },
+  {
+    "Proyecto":"CHAMONIX CIUDAD LA SALLE",
+    "Fecha_Base":1784160000000,
+    "Fecha_Proyectada":1795651200000,
+    "__archivo_origen":"Enero.xlsx"
+  },
+  {
+    "Proyecto":"LA SCALA",
+    "Fecha_Base":1824681600000,
+    "Fecha_Proyectada":1830988800000,
+    "__archivo_origen":"Enero.xlsx"
+  },
+  {
+    "Proyecto":"BURDEOS CIUDAD LA SALLE",
+    "Fecha_Base":1809388800000,
     "Fecha_Proyectada":1811203200000,
     "__archivo_origen":"Febrero.xlsx"
   },
