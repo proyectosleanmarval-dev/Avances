@@ -1,1 +1,35 @@
 
+name: Procesar Excels
+
+on:
+  push:
+    paths:
+      - 'data/*.xlsx'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repo
+        uses: actions/checkout@v3
+
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          pip install pandas openpyxl
+
+      - name: Ejecutar script
+        run: python procesar.py
+
+      - name: Commit consolidado
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data/consolidado.json
+          git commit -m "Actualizar consolidado automático" || echo "Sin cambios"
+          git push
