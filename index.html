@@ -2,13 +2,81 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Días de Atraso por Proyecto</title>
+  <title>Sistema de Seguimiento de Proyectos</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
       background: #f7f9fc;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 30px;
+      border-bottom: 2px solid #1f2937;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      color: #1f2937;
+      margin: 0 0 20px 0;
+      font-size: 24px;
+      font-weight: normal;
+    }
+
+    .botones {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #e5e7eb;
+      color: #1f2937;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #d1d5db;
+    }
+
+    .btn.activo {
+      background: #1f2937;
+      color: white;
+    }
+
+    .vista {
+      display: none;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .vista.activa {
+      display: block;
+    }
+
+    .vista-blanca {
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      font-size: 16px;
+      border: 2px dashed #e5e7eb;
+      border-radius: 8px;
     }
 
     table {
@@ -27,6 +95,7 @@
     th {
       background: #1f2937;
       color: white;
+      font-weight: normal;
     }
 
     td.proyecto {
@@ -40,99 +109,154 @@
       color: #b30000;
       font-weight: bold;
     }
+
+    #estado {
+      color: #6b7280;
+      text-align: center;
+      padding: 40px;
+    }
   </style>
 </head>
 
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Sistema de Seguimiento de Proyectos</h1>
+      
+      <div class="botones">
+        <button id="btnGrilla" class="btn">Actividades de Grilla</button>
+        <button id="btnLastPlanner" class="btn">Avances Last Planner</button>
+      </div>
+    </div>
 
-<h1>Días de Atraso por Proyecto y Mes</h1>
-<div id="estado">Cargando datos...</div>
+    <!-- Vista Actividades de Grilla -->
+    <div id="vistaGrilla" class="vista">
+      <div class="vista-blanca">
+        Contenido de Actividades de Grilla
+      </div>
+    </div>
 
-<table id="tabla" style="display:none;">
-  <thead></thead>
-  <tbody></tbody>
-</table>
+    <!-- Vista Avances Last Planner -->
+    <div id="vistaLastPlanner" class="vista">
+      <div id="estado">Cargando datos...</div>
+      
+      <table id="tabla" style="display:none;">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-<script>
-async function cargarDatos() {
-  try {
-    const response = await fetch('data/consolidado.json');
-    if (!response.ok) throw new Error("No se pudo cargar el JSON");
+  <script>
+    // Manejo de botones y vistas
+    const btnGrilla = document.getElementById('btnGrilla');
+    const btnLastPlanner = document.getElementById('btnLastPlanner');
+    const vistaGrilla = document.getElementById('vistaGrilla');
+    const vistaLastPlanner = document.getElementById('vistaLastPlanner');
 
-    const data = await response.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      document.getElementById("estado").innerText = "No hay datos disponibles.";
-      return;
+    function activarVista(vistaActiva, botonActivo) {
+      // Desactivar todas las vistas
+      vistaGrilla.classList.remove('activa');
+      vistaLastPlanner.classList.remove('activa');
+      
+      // Desactivar todos los botones
+      btnGrilla.classList.remove('activo');
+      btnLastPlanner.classList.remove('activo');
+      
+      // Activar la vista y botón seleccionados
+      vistaActiva.classList.add('activa');
+      botonActivo.classList.add('activo');
     }
 
-    // Agrupar datos
-    const proyectos = {};
-    const mesesSet = new Set();
-
-    data.forEach(d => {
-
-      const proyecto = d.Proyecto;
-
-      // Extraer mes desde nombre archivo (Enero.xlsx -> Enero)
-      const mes = d.__archivo_origen.replace(".xlsx", "");
-
-      mesesSet.add(mes);
-
-      // Calcular días de atraso
-      const base = new Date(d.Fecha_Base);
-      const proyectada = new Date(d.Fecha_Proyectada);
-
-      const diasAtraso = Math.round(
-        (proyectada - base) / (1000 * 60 * 60 * 24)
-      );
-
-      if (!proyectos[proyecto]) {
-        proyectos[proyecto] = {};
-      }
-
-      proyectos[proyecto][mes] = diasAtraso;
+    btnGrilla.addEventListener('click', () => {
+      activarVista(vistaGrilla, btnGrilla);
     });
 
-    const meses = Array.from(mesesSet).sort();
+    btnLastPlanner.addEventListener('click', () => {
+      activarVista(vistaLastPlanner, btnLastPlanner);
+      // Cargar datos si es necesario
+      if (!vistaLastPlanner.hasAttribute('data-cargado')) {
+        cargarDatos();
+        vistaLastPlanner.setAttribute('data-cargado', 'true');
+      }
+    });
 
-    const thead = document.querySelector("#tabla thead");
-    const tbody = document.querySelector("#tabla tbody");
+    // Activar vista de Last Planner por defecto
+    window.addEventListener('load', () => {
+      activarVista(vistaLastPlanner, btnLastPlanner);
+    });
 
-    // Header
-    let header = "<tr><th>Proyecto</th>";
-    meses.forEach(m => header += `<th>${m}</th>`);
-    header += "</tr>";
-    thead.innerHTML = header;
+    // Función cargarDatos (sin cambios, solo movida dentro del script)
+    async function cargarDatos() {
+      try {
+        const response = await fetch('data/consolidado.json');
+        if (!response.ok) throw new Error("No se pudo cargar el JSON");
 
-    // Body
-    let bodyHTML = "";
+        const data = await response.json();
 
-    for (const proyecto in proyectos) {
-      bodyHTML += `<tr><td class="proyecto">${proyecto}</td>`;
+        if (!Array.isArray(data) || data.length === 0) {
+          document.getElementById("estado").innerText = "No hay datos disponibles.";
+          return;
+        }
 
-      meses.forEach(m => {
-        const valor = proyectos[proyecto][m] ?? 0;
-        const clase = valor > 0 ? "atraso" : "";
-        bodyHTML += `<td class="${clase}">${valor}</td>`;
-      });
+        // Agrupar datos
+        const proyectos = {};
+        const mesesSet = new Set();
 
-      bodyHTML += "</tr>";
+        data.forEach(d => {
+          const proyecto = d.Proyecto;
+          const mes = d.__archivo_origen.replace(".xlsx", "");
+          mesesSet.add(mes);
+
+          const base = new Date(d.Fecha_Base);
+          const proyectada = new Date(d.Fecha_Proyectada);
+          const diasAtraso = Math.round(
+            (proyectada - base) / (1000 * 60 * 60 * 24)
+          );
+
+          if (!proyectos[proyecto]) {
+            proyectos[proyecto] = {};
+          }
+
+          proyectos[proyecto][mes] = diasAtraso;
+        });
+
+        const meses = Array.from(mesesSet).sort();
+
+        const thead = document.querySelector("#tabla thead");
+        const tbody = document.querySelector("#tabla tbody");
+
+        // Header
+        let header = "<tr><th>Proyecto</th>";
+        meses.forEach(m => header += `<th>${m}</th>`);
+        header += "</tr>";
+        thead.innerHTML = header;
+
+        // Body
+        let bodyHTML = "";
+
+        for (const proyecto in proyectos) {
+          bodyHTML += `<tr><td class="proyecto">${proyecto}</td>`;
+
+          meses.forEach(m => {
+            const valor = proyectos[proyecto][m] ?? 0;
+            const clase = valor > 0 ? "atraso" : "";
+            bodyHTML += `<td class="${clase}">${valor}</td>`;
+          });
+
+          bodyHTML += "</tr>";
+        }
+
+        tbody.innerHTML = bodyHTML;
+
+        document.getElementById("estado").style.display = "none";
+        document.getElementById("tabla").style.display = "table";
+
+      } catch (error) {
+        document.getElementById("estado").innerText =
+          "Error cargando datos: " + error.message;
+      }
     }
-
-    tbody.innerHTML = bodyHTML;
-
-    document.getElementById("estado").style.display = "none";
-    document.getElementById("tabla").style.display = "table";
-
-  } catch (error) {
-    document.getElementById("estado").innerText =
-      "Error cargando datos: " + error.message;
-  }
-}
-
-cargarDatos();
-</script>
-
+  </script>
 </body>
 </html>
